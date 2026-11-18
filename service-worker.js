@@ -1,16 +1,16 @@
 
-const CACHE_NAME = "zot-static-v1";
+const CACHE_NAME = "zot-app-v1";
 
-const STATIC_FILES = [
-  "./",
+const APP_FILES = [
   "./index.html",
-  "./manifest.json"
+  "./style.css",
+  "./script.js"
 ];
 
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
-      cache.addAll(STATIC_FILES)
+      cache.addAll(APP_FILES)
     )
   );
 
@@ -32,35 +32,29 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  const request = event.request;
-  const url = new URL(request.url);
+  const url = new URL(event.request.url);
 
-  // Supabase and other external requests should go to network.
   if (
+    event.request.method !== "GET" ||
     url.origin !== self.location.origin ||
-    request.method !== "GET"
+    url.pathname.includes("/rest/v1/") ||
+    url.pathname.includes("/auth/v1/") ||
+    url.pathname.includes("/storage/v1/")
   ) {
     return;
   }
 
-  // Only cache the app's basic static files.
-  if (
-    url.pathname.endsWith("/index.html") ||
-    url.pathname.endsWith("/manifest.json") ||
-    url.pathname.endsWith("/")
-  ) {
+  if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(event.request)
         .then(response => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache =>
-              cache.put(request, copy)
-            );
-          }
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache =>
+            cache.put("./index.html", copy)
+          );
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(() => caches.match("./index.html"))
     );
   }
 });
