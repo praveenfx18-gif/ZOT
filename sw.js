@@ -1,17 +1,27 @@
 
-const CACHE_NAME = "zot-app-v1";
+const CACHE_NAME = "zot-app-v2";
 
 const APP_FILES = [
+  "./",
   "./index.html",
-  "./style.css",
-  "./script.js"
+  "./manifest.json"
 ];
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.addAll(APP_FILES)
-    )
+    caches.open(CACHE_NAME).then(async cache => {
+      for (const file of APP_FILES) {
+        try {
+          const response = await fetch(file);
+
+          if (response.ok) {
+            await cache.put(file, response);
+          }
+        } catch (error) {
+          console.log("Cache skipped:", file);
+        }
+      }
+    })
   );
 
   self.skipWaiting();
@@ -22,7 +32,7 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
+          .filter(key => key.startsWith("zot-app-") && key !== CACHE_NAME)
           .map(key => caches.delete(key))
       )
     )
@@ -32,10 +42,11 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  const url = new URL(event.request.url);
+  const request = event.request;
+  const url = new URL(request.url);
 
   if (
-    event.request.method !== "GET" ||
+    request.method !== "GET" ||
     url.origin !== self.location.origin ||
     url.pathname.includes("/rest/v1/") ||
     url.pathname.includes("/auth/v1/") ||
@@ -44,17 +55,12 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  if (event.request.mode === "navigate") {
+  if (request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache =>
-            cache.put("./index.html", copy)
-          );
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
+      fetch(request).catch(async () => {
+        return await caches.match("./index.html") ||
+               await caches.match("./");
+      })
     );
   }
 });
