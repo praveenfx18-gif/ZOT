@@ -319,7 +319,7 @@ async function forgotPassword() {
     const { error } = await dbClient.auth.resetPasswordForEmail(
         email,
         {
-            redirectTo: window.location.origin
+            redirectTo: "https://praveenfx18-gif.github.io/Zot/"
         }
     );
 
@@ -328,7 +328,7 @@ async function forgotPassword() {
         return;
     }
 
-    showToast("Password reset email requested");
+    showToast("Password reset email sent. Check your inbox.");
 }
 
 
