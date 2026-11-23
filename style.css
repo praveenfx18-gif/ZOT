@@ -3118,3 +3118,64 @@ tbody tr:hover {
         margin-top: auto !important;
     }
 }
+/* ===== DESKTOP MAIN LAYOUT FIX ===== */
+
+@media screen and (min-width: 1024px) {
+
+    #app.app-container {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    #app #sidebar {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+
+        flex: 0 0 260px !important;
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
+
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+
+    #app main.main-content {
+        display: block !important;
+        position: relative !important;
+
+        flex: 1 1 0px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        margin-left: 0 !important;
+        transform: none !important;
+
+        height: 100vh !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+    }
+
+    #app main.main-content > .topbar {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    #app main.main-content > .page-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    #app main.main-content > .app-footer {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
